@@ -1,0 +1,39 @@
+version: '3.7'
+
+services:
+  postgres:
+    image: postgres:13.1-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456788
+      POSTGRES_DB: todo
+    volumes:
+      - todo-pstg:/var/lib/postgresql/data
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf
+
+  backend:
+    container_name: backend-container_prod
+    image: backend_prod
+    build:
+      dockerfile: ./Dockerfile
+    command: npm run start
+    environment:
+      PORT: 8080
+      DB_NAME: todo
+      DB_USER: postgres
+      DB_PASSWORD: 123456788
+      DB_HOST: postgres
+      DB_PORT: 5432
+      SECRET_KEY: "SOME_SECRET_KEY_TODO"
+    ports:
+      - 8080:8080
+    volumes:
+      - ./:/home/node/app
+      - /home/node/app/node_modules
+    depends_on:
+      - postgres
+    stdin_open: true
+    restart: unless-stopped
+
+volumes:
+  todo-pstg:
